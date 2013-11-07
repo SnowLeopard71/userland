@@ -56,12 +56,15 @@ MMAL_STATUS_T mmal_parse_video_size(uint32_t *w, uint32_t *h, const char *str)
       uint32_t width;
       uint32_t height;
    } sizes[] = {
+      { "qxga",  2592, 1944 },
       { "1080p", 1920, 1080 },
+      { "960p",  1280,  960 },
       { "720p",  1280,  720 },
       { "vga",    640,  480 },
       { "wvga",   800,  480 },
       { "cif",    352,  288 },
       { "qcif",   352/2, 288/2 },
+      { "qvga",   320,  240 },
    };
    size_t i;
    for (i=0; i<vcos_countof(sizes); i++)

@@ -205,7 +205,7 @@ Allows the specification of the area of the sensor to be used as the source for 
 
 	--shutter,	-ss	Set shutter speed
 
-Set the shutter speed to the specified value (in microseconds). There is currently an upper limit of approximately 330000us (330ms, 0.33s) past which operation is undefined. This is being investigated.
+Set the shutter speed to the specified value. If a rational number is given (ie 1/60) it is interpreted as seconds, if a whole number is given (ie 1600) it is interpreted as microseconds. There is currently an upper limit of approximately 330000us (330ms, 1/3) past which operation is undefined. This is being investigated.
 
 Application specific settings
 

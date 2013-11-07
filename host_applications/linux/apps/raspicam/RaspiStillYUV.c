@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory.h>
 #include <sysexits.h>
 
-#define VERSION_STRING "v1.3.2"
+#define VERSION_STRING "v1.3.3"
 
 #include "bcm_host.h"
 #include "interface/vcos/vcos.h"
@@ -67,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "interface/mmal/util/mmal_util_params.h"
 #include "interface/mmal/util/mmal_default_components.h"
 #include "interface/mmal/util/mmal_connection.h"
-
+#include "interface/mmal/util/mmal_param_convert.h"
 
 #include "RaspiCamControl.h"
 #include "RaspiPreview.h"
@@ -135,6 +135,7 @@ static void display_valid_parameters(char *app_name);
 #define CommandTimeout      5
 #define CommandTimelapse    6
 #define CommandUseRGB       7
+#define CommandVideoSize    8
 
 static COMMAND_LIST cmdline_commands[] =
 {
@@ -146,6 +147,7 @@ static COMMAND_LIST cmdline_commands[] =
    { CommandTimeout, "-timeout",    "t",  "Time (in ms) before takes picture and shuts down. If not specified set to 5s", 1 },
    { CommandTimelapse,"-timelapse", "tl", "Timelapse mode. Takes a picture every <t>ms", 1},
    { CommandUseRGB,  "-rgb",        "rgb","Save as RGB data rather than YUV", 0},
+   { CommandVideoSize, "-videosize",     "vs",  "Set image/video size by name (qxga, 1080p, 960p, 720p, vga, qvga)", 1},
 };
 
 static int cmdline_commands_size = sizeof(cmdline_commands) / sizeof(cmdline_commands[0]);
@@ -257,6 +259,20 @@ static int parse_cmdline(int argc, const char **argv, RASPISTILLYUV_STATE *state
          else
             i++;
          break;
+
+      case CommandVideoSize:   // set width & height by name
+      {
+         uint32_t w,h;
+         // TODO? convert arg to lowercase before parsing?  would allow both VGA and vga to be valid options
+         if (mmal_parse_video_size(&w, &h, argv[i + 1]) == MMAL_SUCCESS)
+         {
+            state->width = w;
+            state->height = h;
+            i++;
+         } else
+            valid = 0;
+         break;
+      }
 
       case CommandOutput:  // output filename
       {

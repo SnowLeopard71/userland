@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 #include <sysexits.h>
 
-#define VERSION_STRING "v1.3.5"
+#define VERSION_STRING "v1.3.6"
 
 #include "bcm_host.h"
 #include "interface/vcos/vcos.h"
@@ -69,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "interface/mmal/util/mmal_util_params.h"
 #include "interface/mmal/util/mmal_default_components.h"
 #include "interface/mmal/util/mmal_connection.h"
-
+#include "interface/mmal/util/mmal_param_convert.h"
 
 #include "RaspiCamControl.h"
 #include "RaspiPreview.h"
@@ -176,6 +176,7 @@ static void store_exif_tag(RASPISTILL_STATE *state, const char *exif_tag);
 #define CommandLink         14
 #define CommandKeypress     15
 #define CommandSignal       16
+#define CommandVideoSize    17
 
 static COMMAND_LIST cmdline_commands[] =
 {
@@ -196,6 +197,7 @@ static COMMAND_LIST cmdline_commands[] =
    { CommandFullResPreview,"-fullpreview","fp", "Run the preview using the still capture resolution (may reduce preview fps)", 0},
    { CommandKeypress,"-keypress",   "k",  "Wait between captures for a ENTER, X then ENTER to exit", 0},
    { CommandSignal,  "-signal",     "s",  "Wait between captures for a SIGUSR1 from another process", 0},
+   { CommandVideoSize, "-videosize",     "vs",  "Set image/video size by name (qxga, 1080p, 960p, 720p, vga, qvga)", 1},
 };
 
 static int cmdline_commands_size = sizeof(cmdline_commands) / sizeof(cmdline_commands[0]);
@@ -399,6 +401,20 @@ static int parse_cmdline(int argc, const char **argv, RASPISTILL_STATE *state)
          else
             i++;
          break;
+
+      case CommandVideoSize:	// set width & height by name
+      {
+	 uint32_t w,h;
+ 	 // TODO? convert arg to lowercase before parsing?  would allow both VGA and vga to be valid options
+	 if (mmal_parse_video_size(&w, &h, argv[i + 1]) == MMAL_SUCCESS)
+	 {
+	    state->width = w;
+	    state->height = h;
+            i++;
+	 } else 
+	    valid = 0;
+	 break;
+      }
 
       case CommandQuality: // Quality = 1-100
          if (sscanf(argv[i + 1], "%u", &state->quality) == 1)
